@@ -1,0 +1,531 @@
+<meta charset="utf-8">
+<style>
+  :root {
+    --ink: #12211f;
+    --ink-soft: #5c6f6c;
+    --rule: #d8e0de;
+    --paper: #fbfcfc;
+    --teal: #0f7a72;
+    --teal-deep: #0a5751;
+    --amber: #b06f00;
+    --amber-bg: #fdf6e7;
+    --red: #a32b1f;
+    --red-bg: #fceeec;
+  }
+
+  * { box-sizing: border-box; }
+
+  .cr-wrap {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    max-width: 900px;
+    line-height: 1.45;
+    font-size: 14px;
+  }
+
+  .cr-head {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+    margin-bottom: 22px;
+  }
+  .cr-head h1 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .cr-head p {
+    margin: 4px 0 0;
+    color: var(--ink-soft);
+    font-size: 13px;
+  }
+
+  .cr-step {
+    margin-bottom: 26px;
+  }
+  .cr-step > h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-weight: 650;
+    color: var(--teal-deep);
+    margin: 0 0 9px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .cr-step > h2 .n {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .cr-drop {
+    border: 1.5px dashed var(--rule);
+    border-radius: 4px;
+    background: var(--paper);
+    padding: 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+  .cr-drop:hover, .cr-drop.hot {
+    border-color: var(--teal);
+    background: #f2f8f7;
+  }
+  .cr-drop strong { font-weight: 600; }
+  .cr-drop span { color: var(--ink-soft); font-size: 13px; display: block; margin-top: 3px; }
+  .cr-drop input { display: none; }
+
+  .cr-loaded {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    background: #f2f8f7;
+    border-left: 3px solid var(--teal);
+    padding: 8px 11px;
+    margin-top: 10px;
+    color: var(--teal-deep);
+  }
+
+  table.cr-t {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.cr-t th {
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-soft);
+    font-weight: 600;
+    border-bottom: 1px solid var(--ink);
+    padding: 0 10px 5px 0;
+  }
+  table.cr-t td {
+    padding: 7px 10px 7px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+  }
+  table.cr-t td.num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  input.cr-id {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    width: 110px;
+    padding: 5px 7px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--ink);
+  }
+  input.cr-id:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 2px rgba(15,122,114,.13);
+  }
+  input.cr-id.missing {
+    border-color: var(--amber);
+    background: var(--amber-bg);
+  }
+
+  .cr-src {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--teal);
+    margin-top: 3px;
+    font-weight: 600;
+  }
+
+  .cr-flag {
+    border-radius: 3px;
+    padding: 9px 12px;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  .cr-flag.warn { background: var(--amber-bg); border-left: 3px solid var(--amber); color: #6b4400; }
+  .cr-flag.ok   { background: #eef7f0; border-left: 3px solid #2e7d46; color: #245c37; }
+  td.cr-dim { color: #b3bdbb; }
+  .cr-flag.bad  { background: var(--red-bg);  border-left: 3px solid var(--red);   color: #7a2016; }
+  .cr-flag b { font-weight: 650; }
+
+  button.cr-go {
+    background: var(--teal);
+    color: #fff;
+    border: 0;
+    border-radius: 3px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button.cr-go:hover { background: var(--teal-deep); }
+  button.cr-go:disabled { background: #c3ceccff; cursor: not-allowed; }
+
+  .cr-note {
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    margin-top: 9px;
+  }
+
+  pre.cr-out {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11.5px;
+    background: #12211f;
+    color: #d9e6e4;
+    padding: 13px 15px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 12px 0 0;
+    line-height: 1.6;
+  }
+  pre.cr-out .hdr { color: #6fd3c6; }
+
+  .cr-empty { color: var(--ink-soft); font-style: italic; font-size: 13px; }
+</style>
+
+<div class="cr-wrap">
+  <div class="cr-head">
+    <h1>Chorus &rarr; Rippling payroll converter</h1>
+    <p>Renames Chorus's columns to the headers Rippling's pay run expects. No manual mapping screen.</p>
+  </div>
+
+  <div class="cr-step">
+    <h2><span class="n">01</span> Chorus export</h2>
+    <label class="cr-drop" id="drop">
+      <strong>Drop the PayrollExport CSV here</strong>
+      <span>or click to choose a file</span>
+      <input type="file" id="file" accept=".csv,text/csv">
+    </label>
+    <div id="loaded"></div>
+  </div>
+
+  <div class="cr-step" id="rosterStep" style="display:none">
+    <h2><span class="n">02</span> Rippling employee numbers</h2>
+    <table class="cr-t">
+      <thead>
+        <tr>
+          <th style="width:26%">Employee</th>
+          <th style="width:18%">Rippling Emp No</th>
+          <th style="width:14%">Billable hrs</th>
+          <th style="width:14%">Billable pay</th>
+          <th style="width:14%">Admin hrs</th>
+          <th style="width:14%">Admin pay</th>
+        </tr>
+      </thead>
+      <tbody id="roster"></tbody>
+    </table>
+    <div class="cr-note">Pulled from Chorus's Employee ID field. If one is blank, set it on that person's Chorus contact record so it carries forward every cycle.</div>
+    <div id="flags"></div>
+  </div>
+
+  <div class="cr-step" id="outStep" style="display:none">
+    <h2><span class="n">03</span> Rippling-ready file</h2>
+    <button class="cr-go" id="dl">Download CSV for Rippling</button>
+    <div class="cr-note">In Rippling: open the pay run &rarr; Import CSV &rarr; upload this file.</div>
+    <pre class="cr-out" id="preview"></pre>
+  </div>
+</div>
+
+<script>
+(function () {
+  var roster = {};
+  var rows = [];
+
+  var elFile = document.getElementById('file');
+  var elDrop = document.getElementById('drop');
+  var elLoaded = document.getElementById('loaded');
+  var elRosterStep = document.getElementById('rosterStep');
+  var elRoster = document.getElementById('roster');
+  var elFlags = document.getElementById('flags');
+  var elOutStep = document.getElementById('outStep');
+  var elPreview = document.getElementById('preview');
+  var elDl = document.getElementById('dl');
+
+  function saveRoster() { /* employee numbers come from the Chorus export */ }
+
+  // --- CSV parsing (handles quoted fields) ---
+  function parseCSV(text) {
+    var out = [], row = [], cur = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (q) {
+        if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+        else if (c === '"') { q = false; }
+        else { cur += c; }
+      } else if (c === '"') { q = true; }
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\r') { /* skip */ }
+      else if (c === '\n') { row.push(cur); out.push(row); row = []; cur = ''; }
+      else { cur += c; }
+    }
+    if (cur !== '' || row.length) { row.push(cur); out.push(row); }
+    return out.filter(function (r) { return r.some(function (v) { return v.trim() !== ''; }); });
+  }
+
+  function num(v) {
+    var n = parseFloat(String(v == null ? '' : v).replace(/[$,\s]/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function money(n) { return n.toFixed(2); }
+
+  elDrop.addEventListener('dragover', function (e) { e.preventDefault(); elDrop.classList.add('hot'); });
+  elDrop.addEventListener('dragleave', function () { elDrop.classList.remove('hot'); });
+  elDrop.addEventListener('drop', function (e) {
+    e.preventDefault();
+    elDrop.classList.remove('hot');
+    if (e.dataTransfer.files[0]) read(e.dataTransfer.files[0]);
+  });
+  elFile.addEventListener('change', function (e) {
+    if (e.target.files[0]) read(e.target.files[0]);
+  });
+
+  function read(f) {
+    var fr = new FileReader();
+    fr.onload = function () { ingest(fr.result, f.name); };
+    fr.onerror = function () { elLoaded.innerHTML = '<div class="cr-flag bad">Could not read that file.</div>'; };
+    fr.readAsText(f);
+  }
+
+  function ingest(text, name) {
+    var grid = parseCSV(text);
+    if (grid.length < 2) {
+      elLoaded.innerHTML = '<div class="cr-flag bad">No data rows found in that file.</div>';
+      return;
+    }
+
+    var head = grid[0].map(function (h) { return h.trim().toLowerCase(); });
+    function col(label) { return head.indexOf(label.toLowerCase()); }
+
+    var iFirst = col('First Name'),
+        iLast  = col('Last Name'),
+        iEmpId = col('Employee ID'),
+        iHrs   = col('Regular Hours'),
+        iRate  = col('Actual Rate'),
+        iPay   = col('Regular Pay'),
+        iNbHrs = col('Non-Billable Hours'),
+        iNbPay = col('Non-Billable Pay'),
+        iReimb = col('Reimbursements'),
+        iDflt  = col('Default Rate');
+
+    if (iFirst < 0 || iLast < 0 || iHrs < 0) {
+      elLoaded.innerHTML = '<div class="cr-flag bad">This does not look like a Chorus payroll export. Expected columns: First Name, Last Name, Regular Hours, Actual Rate, Regular Pay.</div>';
+      return;
+    }
+
+    // Chorus emits one row PER RATE. A person with both billable and
+    // admin time appears on two rows. Merge every row for the same person
+    // into a single record, keeping billable and non-billable separate.
+    var byPerson = {};
+    var order = [];
+
+    grid.slice(1).forEach(function (r) {
+      var first = (r[iFirst] || '').trim();
+      var last  = (r[iLast]  || '').trim();
+      var nm    = (first + ' ' + last).trim();
+      if (!nm) return;
+
+      var fromFile = iEmpId > -1 ? (r[iEmpId] || '').trim() : '';
+      if (fromFile) roster[nm] = fromFile;
+
+      if (!byPerson[nm]) {
+        byPerson[nm] = {
+          name: nm,
+          fromFile: !!fromFile,
+          hours: 0, pay: 0, rate: 0,      // billable
+          nbHrs: 0, nbPay: 0, nbRate: 0,  // non-billable / admin
+          reimb: 0,
+          dflt: iDflt > -1 ? num(r[iDflt]) : 0
+        };
+        order.push(nm);
+      }
+      var p = byPerson[nm];
+      if (fromFile) p.fromFile = true;
+
+      var rate  = num(r[iRate]);
+      var regHrs = num(r[iHrs]);
+      var regPay = num(r[iPay]);
+      var nbHrs = iNbHrs > -1 ? num(r[iNbHrs]) : 0;
+      var nbPay = iNbPay > -1 ? num(r[iNbPay]) : 0;
+
+      // Billable hours on this row
+      if (regHrs > 0 || regPay > 0) {
+        p.hours += regHrs;
+        p.pay   += regPay;
+        if (rate > 0) p.rate = rate;      // billable rate
+      }
+      // Non-billable / admin hours on this row
+      if (nbHrs > 0 || nbPay > 0) {
+        p.nbHrs += nbHrs;
+        p.nbPay += nbPay;
+        if (rate > 0) p.nbRate = rate;    // admin rate (Actual Rate on the admin row)
+      }
+      p.reimb += iReimb > -1 ? num(r[iReimb]) : 0;
+    });
+
+    rows = order.map(function (nm) { return byPerson[nm]; });
+
+    saveRoster();
+
+    elLoaded.innerHTML = '<div class="cr-loaded">' + escapeHtml(name) + ' &middot; ' +
+      rows.length + (rows.length === 1 ? ' employee' : ' employees') + '</div>';
+
+    render();
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function render() {
+    if (!rows.length) return;
+
+    elRosterStep.style.display = '';
+    elOutStep.style.display = '';
+    elRoster.innerHTML = '';
+
+    rows.forEach(function (r, idx) {
+      var tr = document.createElement('tr');
+
+      var tdName = document.createElement('td');
+      tdName.textContent = r.name;
+      tr.appendChild(tdName);
+
+      var tdId = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.className = 'cr-id';
+      inp.type = 'text';
+      inp.placeholder = '—';
+      inp.value = roster[r.name] || '';
+      if (!inp.value) inp.classList.add('missing');
+      inp.addEventListener('input', function () {
+        var v = inp.value.trim();
+        if (v) { roster[r.name] = v; inp.classList.remove('missing'); }
+        else { delete roster[r.name]; inp.classList.add('missing'); }
+        saveRoster();
+        refresh();
+      });
+      tdId.appendChild(inp);
+      if (r.fromFile) {
+        var src = document.createElement('div');
+        src.className = 'cr-src';
+        src.textContent = 'from Chorus';
+        tdId.appendChild(src);
+      }
+      tr.appendChild(tdId);
+
+      [
+        { v: r.hours, money: false },
+        { v: r.pay,   money: true  },
+        { v: r.nbHrs, money: false, dim: r.nbHrs === 0 },
+        { v: r.nbPay, money: true,  dim: r.nbHrs === 0 }
+      ].forEach(function (c) {
+        var td = document.createElement('td');
+        td.className = 'num' + (c.dim ? ' cr-dim' : '');
+        td.textContent = c.money ? '$' + money(c.v) : String(c.v);
+        tr.appendChild(td);
+      });
+
+      elRoster.appendChild(tr);
+    });
+
+    refresh();
+  }
+
+  function refresh() {
+    var flags = [];
+
+    var missing = rows.filter(function (r) { return !roster[r.name]; });
+    if (missing.length) {
+      flags.push('<div class="cr-flag warn"><b>No Employee ID in the Chorus export</b> for ' +
+        missing.map(function (r) { return escapeHtml(r.name); }).join(', ') +
+        '. Type it here to build the file now, or set it on their Chorus contact record so future exports carry it.</div>');
+    }
+
+    var mismatch = rows.filter(function (r) {
+      var billOff  = r.hours && r.rate  && Math.abs(r.hours * r.rate  - r.pay)   > 0.01;
+      var adminOff = r.nbHrs && r.nbRate && Math.abs(r.nbHrs * r.nbRate - r.nbPay) > 0.01;
+      return billOff || adminOff;
+    });
+    if (mismatch.length) {
+      flags.push('<div class="cr-flag bad"><b>Hours &times; rate does not equal pay</b> for ' +
+        mismatch.map(function (r) { return escapeHtml(r.name); }).join(', ') +
+        '. Check the Chorus export before you run payroll.</div>');
+    }
+
+    var nb = rows.filter(function (r) { return r.nbHrs > 0 || r.nbPay > 0; });
+    if (nb.length) {
+      flags.push('<div class="cr-flag ok"><b>Admin time included as its own line</b> \u2014 ' +
+        nb.map(function (r) { return escapeHtml(r.name) + ' (' + r.nbHrs + ' hr @ $' + money(r.nbRate) + ' = $' + money(r.nbPay) + ')'; }).join('; ') +
+        '. It appears as a second row at the admin rate, so the whole file uploads in one shot.</div>');
+    }
+
+    var rb = rows.filter(function (r) { return r.reimb > 0; });
+    if (rb.length) {
+      flags.push('<div class="cr-flag warn"><b>Reimbursements not included</b> for ' +
+        rb.map(function (r) { return escapeHtml(r.name); }).join(', ') +
+        '. Enter these separately in Rippling so they stay untaxed.</div>');
+    }
+
+    elFlags.innerHTML = flags.join('');
+
+    var ready = rows.filter(function (r) { return roster[r.name]; });
+    elDl.disabled = ready.length === 0;
+    elDl.textContent = ready.length === rows.length
+      ? 'Download CSV for Rippling'
+      : 'Download CSV (' + ready.length + ' of ' + rows.length + ' ready)';
+
+    elPreview.innerHTML = ready.length
+      ? highlight(build(ready))
+      : '<span class="hdr">Add a Rippling employee number to build the file.</span>';
+  }
+
+  function build(list) {
+    // Rippling's import only has Base Pay Hours / Rate / Amount fields
+    // (no dedicated admin-hours or admin-amount field). So admin time is
+    // written as its OWN row in the same billable format, at the admin rate.
+    // A person with both kinds of time produces two rows; everything maps,
+    // nothing has to be typed into the pay run.
+    var lines = ['Employee Name,Rippling Emp No,Base Pay Hours,Base Pay Rate,Base Pay Amount'];
+    list.forEach(function (r) {
+      var nm = '"' + r.name.replace(/"/g, '""') + '"';
+      var id = roster[r.name];
+      if (r.hours > 0 || r.pay > 0) {
+        lines.push([nm, id, r.hours, money(r.rate), money(r.pay)].join(','));
+      }
+      if (r.nbHrs > 0 || r.nbPay > 0) {
+        lines.push([nm, id, r.nbHrs, money(r.nbRate), money(r.nbPay)].join(','));
+      }
+    });
+    return lines.join('\n');
+  }
+
+  function highlight(csv) {
+    var parts = csv.split('\n');
+    return '<span class="hdr">' + escapeHtml(parts[0]) + '</span>\n' +
+      escapeHtml(parts.slice(1).join('\n'));
+  }
+
+  elDl.addEventListener('click', function () {
+    var ready = rows.filter(function (r) { return roster[r.name]; });
+    if (!ready.length) return;
+    var blob = new Blob([build(ready)], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Rippling_PayRun_' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+})();
+</script>
